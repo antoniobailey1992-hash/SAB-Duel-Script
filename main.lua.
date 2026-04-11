@@ -1,0 +1,15 @@
+local Player = game.Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+
+-- Set Speed
+Character.Humanoid.WalkSpeed = 35 
+
+-- Fast Grab Logic
+game:GetService("RunService").Stepped:Connect(function()
+    for _, item in pairs(workspace:GetChildren()) do
+        if item:IsA("BasePart") and item:FindFirstChild("TouchInterest") then
+            firetouchinterest(Character.HumanoidRootPart, item, 0)
+            firetouchinterest(Character.HumanoidRootPart, item, 1)
+        end
+    end
+end)
