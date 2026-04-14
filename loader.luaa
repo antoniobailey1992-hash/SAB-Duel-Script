@@ -1,30 +1,37 @@
--- KEY SYSTEM LOADER
-local correctKey = "Key_1122HGRUWBNDRUU363672"
-
--- Create simple Key UI
 local SG = Instance.new("ScreenGui", game.CoreGui)
 local Frame = Instance.new("Frame", SG)
-Frame.Size = UDim2.new(0, 300, 0, 150)
-Frame.Position = UDim2.new(0.5, -150, 0.5, -75)
-Frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Frame.Size = UDim2.new(0, 320, 0, 180)
+Frame.Position = UDim2.new(0.5, -160, 0.5, -90)
+Frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+Frame.Active = true
+Frame.Draggable = true -- Now you can move the box!
+
+local Title = Instance.new("TextLabel", Frame)
+Title.Text = "BRAINROT HUB | KEY"
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.TextColor3 = Color3.new(1, 1, 1)
+Title.BackgroundColor3 = Color3.fromRGB(30, 0, 60)
 
 local Box = Instance.new("TextBox", Frame)
-Box.PlaceholderText = "Enter Key..."
+Box.PlaceholderText = "Paste Key_1122..."
 Box.Size = UDim2.new(0.8, 0, 0, 40)
-Box.Position = UDim2.new(0.1, 0, 0.3, 0)
+Box.Position = UDim2.new(0.1, 0, 0.35, 0)
+Box.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+Box.TextColor3 = Color3.new(1, 1, 1)
 
 local Btn = Instance.new("TextButton", Frame)
-Btn.Text = "Check Key"
-Btn.Size = UDim2.new(0.6, 0, 0, 30)
+Btn.Text = "AUTHENTICATE"
+Btn.Size = UDim2.new(0.6, 0, 0, 35)
 Btn.Position = UDim2.new(0.2, 0, 0.7, 0)
+Btn.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
+Btn.TextColor3 = Color3.new(1, 1, 1)
 
 Btn.MouseButton1Click:Connect(function()
-    if Box.Text == correctKey then
+    if Box.Text == "Key_1122HGRUWBNDRUU363672" then
         SG:Destroy()
-        -- LOADS YOUR MAIN SCRIPT FROM GITHUB
         loadstring(game:HttpGet("https://raw.githubusercontent.com/antoniobailey1992-hash/SAB-Duel-Script/main/main.lua"))()
     else
-        Box.Text = ""
-        Box.PlaceholderText = "WRONG KEY!"
+        Title.Text = "INVALID KEY"
+        Title.TextColor3 = Color3.new(1, 0, 0)
     end
 end)
