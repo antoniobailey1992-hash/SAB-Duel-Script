@@ -1,34 +1,45 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-local Window = Rayfield:CreateWindow({Name = "Brainrot Hub v5.0", LoadingTitle = "Antonio's Private Hub"})
+local Window = Rayfield:CreateWindow({Name = "Brainrot Hub v6.0", LoadingTitle = "TikTok Edition Active"})
 
-local FarmerTab = Window:CreateTab("High-Tier Farm", 4483362458)
-local ServerTab = Window:CreateTab("Server Finder", 4483362458)
+local StealTab = Window:CreateTab("Void Stealer", 4483362458)
 
--- 1. Auto-Fly to Best Brainrot
-FarmerTab:CreateToggle({
-    Name = "Auto-Fly to Best Item",
+-- 1. Void Stealer (Vacuum All Items)
+StealTab:CreateToggle({
+    Name = "Vacuum All Brainrots",
     CurrentValue = false,
     Callback = function(Value)
-        _G.AutoFly = Value
+        _G.Vacuum = Value
         task.spawn(function()
-            while _G.AutoFly do
-                local bestItem = nil
-                local maxVal = 0
-                -- Scans for items worth 20M+ or 100M+
+            while _G.Vacuum do
                 for _, item in pairs(workspace:GetChildren()) do
-                    if item:IsA("Tool") or item:FindFirstChild("TouchInterest") then
-                        local val = item:FindFirstChild("Value") and item.Value.Value or 0
-                        if val > maxVal then
-                            maxVal = val
-                            bestItem = item
+                    if item.Name == "Brainrot" or item:FindFirstChild("TouchInterest") then
+                        -- Snaps item to you instead of you to item (harder to catch)
+                        local root = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                        if root and item:IsA("BasePart") then
+                            item.CFrame = root.CFrame
+                        elseif item:IsA("Tool") and item:FindFirstChild("Handle") then
+                            item.Handle.CFrame = root.CFrame
                         end
                     end
                 end
-                
-                if bestItem then
-                    -- Smooth fly to the item
-                    local char = game.Players.LocalPlayer.Character
-                    char.HumanoidRootPart.CFrame = bestItem.CFrame * CFrame.new(0, 2, 0)
+                task.wait(0.3)
+            end
+        end)
+    end,
+})
+
+-- 2. Anti-Void (Fly back if you fall)
+StealTab:CreateToggle({
+    Name = "Anti-Void Fall",
+    CurrentValue = false,
+    Callback = function(Value)
+        _G.AntiVoid = Value
+        task.spawn(function()
+            while _G.AntiVoid do
+                local root = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if root and root.Position.Y < -10 then
+                    root.Velocity = Vector3.new(0, 100, 0)
+                    root.CFrame = root.CFrame * CFrame.new(0, 50, 0)
                 end
                 task.wait(0.5)
             end
@@ -36,36 +47,15 @@ FarmerTab:CreateToggle({
     end,
 })
 
--- 2. Server Hop with Money Filters
-local minMoney = "20M"
-ServerTab:CreateDropdown({
-    Name = "Min Money Per Sec",
-    Options = {"20M", "100M", "500M", "1B"},
-    CurrentValue = "20M",
-    Callback = function(Option)
-        minMoney = Option
-    end,
-})
-
-ServerTab:CreateButton({
-    Name = "Find & Hop Server",
+-- 3. Instant Cash Collect (From the video)
+StealTab:CreateButton({
+    Name = "Collect All Cash Zones",
     Callback = function()
-        local Http = game:GetService("HttpService")
-        local TPS = game:GetService("TeleportService")
-        local Api = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Desc&limit=100"
-        
-        local success, result = pcall(function()
-            return game:HttpGet(Api)
-        end)
-        
-        if success then
-            local srvs = Http:JSONDecode(result)
-            for _, s in pairs(srvs.data) do
-                if s.playing < s.maxPlayers then
-                    -- Teleports you to a high-tier server
-                    TPS:TeleportToPlaceInstance(game.PlaceId, s.id)
-                    break
-                end
+        for _, zone in pairs(workspace:GetDescendants()) do
+            if zone.Name == "Collect" or zone.Name == "CashZone" then
+                firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, zone, 0)
+                task.wait(0.05)
+                firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, zone, 1)
             end
         end
     end,
