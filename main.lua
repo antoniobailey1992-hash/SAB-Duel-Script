@@ -1,38 +1,89 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-local Window = Rayfield:CreateWindow({Name = "Brainrot Hub v3.1", LoadingTitle = "Antonio's Private Hub"})
+local Window = Rayfield:CreateWindow({Name = "Brainrot Hub v4.0", LoadingTitle = "Antonio's Private Hub"})
 
-local Tab = Window:CreateTab("Auto-Steal", 4483362458)
+local Tab = Window:CreateTab("Main Ops", 4483362458)
 
--- Function to find YOUR specific base
-local function getMyBase()
-    -- Check common names like "Bases" or "PlayerBases"
-    local basesFolder = workspace:FindFirstChild("Bases") or workspace:FindFirstChild("PlayerBases")
-    if basesFolder then
-        for _, base in pairs(basesFolder:GetChildren()) do
-            -- Look for your name on the base sign or owner value
-            if base:FindFirstChild("Owner") and (base.Owner.Value == game.Players.LocalPlayer.Name or base.Owner.Value == game.Players.LocalPlayer.UserId) then
-                return base:GetModelCFrame()
+-- 1. Server Hopper (Money Filter)
+Tab:CreateButton({
+    Name = "Server Hop (High Money Servers)",
+    Callback = function()
+        local Http = game:GetService("HttpService")
+        local TPS = game:GetService("TeleportService")
+        local Api = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Desc&limit=100"
+        local _srv = Http:JSONDecode(game:HttpGet(Api))
+        for _, s in pairs(_srv.data) do
+            if s.playing < s.maxPlayers then
+                TPS:TeleportToPlaceInstance(game.PlaceId, s.id)
             end
         end
-    end
-    return nil
-end
+    end,
+})
 
--- Improved TP Logic
+-- 2. Two-Point Teleport (Set your own Base Point)
+local PointA = nil
+Tab:CreateButton({
+    Name = "Set Return Point (Base)",
+    Callback = function()
+        PointA = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+        Rayfield:Notify({Title = "Point Set!", Content = "Return point saved."})
+    end,
+})
+
+Tab:CreateButton({
+    Name = "TP to Return Point",
+    Callback = function()
+        if PointA then
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = PointA
+        end
+    end,
+})
+
+-- 3. Desync Lag Mode (Visual Jumps)
 Tab:CreateToggle({
-    Name = "Instant Base TP on Grab",
+    Name = "Desync Lag Mode",
     CurrentValue = false,
     Callback = function(Value)
-        _G.BaseTP = Value
-        
-        -- Check Character for the item (in case it doesn't go to backpack)
-        game.Players.LocalPlayer.Character.ChildAdded:Connect(function(child)
-            if _G.BaseTP and child:IsA("Tool") then
-                local baseCF = getMyBase()
-                if baseCF then
-                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = baseCF
-                    print("Grabbed item! TPing to Base...")
+        _G.Desync = Value
+        task.spawn(function()
+            while _G.Desync do
+                local root = game.Players.LocalPlayer.Character.HumanoidRootPart
+                -- Rapidly shifts position to look laggy to others
+                local oldCF = root.CFrame
+                root.CFrame = oldCF * CFrame.new(math.random(-10,10), 0, math.random(-10,10))
+                task.wait(0.1)
+                root.CFrame = oldCF
+                task.wait(4.9) -- Jumps every 5 seconds as requested
+            end
+        end)
+    end,
+})
+
+-- 4. Phase Through Lasers (Noclip)
+Tab:CreateToggle({
+    Name = "Phase (Noclip Lasers)",
+    CurrentValue = false,
+    Callback = function(Value)
+        _G.Noclip = Value
+        game:GetService("RunService").Stepped:Connect(function()
+            if _G.Noclip then
+                for _, v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
+                    if v:IsA("BasePart") then v.CanCollide = false end
                 end
+            end
+        end)
+    end,
+})
+
+-- 5. Enhanced Carrying Speed
+Tab:CreateToggle({
+    Name = "Infinite Carry Speed",
+    CurrentValue = false,
+    Callback = function(Value)
+        _G.FastCarry = Value
+        task.spawn(function()
+            while _G.FastCarry do
+                game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 60
+                task.wait(0.1)
             end
         end)
     end,
